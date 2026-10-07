@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import z from 'zod';
+import { z } from 'zod';
 import { storageKey } from '@/shared/config/storage';
 import { mergeWithSchema } from '@/shared/lib/persist';
 import { purchaseSchema, type Purchase, type PurchaseInput } from './Purchase';
