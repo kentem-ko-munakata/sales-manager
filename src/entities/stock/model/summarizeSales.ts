@@ -74,3 +74,13 @@ export const summarizeSales = (
   }
   return summaries;
 };
+
+// 売上状況の合計
+export const sumSalesSummaries = (summaries: SalesSummary[]): { sales: number; profit: number } =>
+  summaries.reduce(
+    (total, summary) => ({
+      sales: total.sales + summary.sales,
+      profit: total.profit + summary.profit,
+    }),
+    { sales: 0, profit: 0 },
+  );
