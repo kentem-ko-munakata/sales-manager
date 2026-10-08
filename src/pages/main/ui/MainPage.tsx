@@ -1,4 +1,5 @@
 import { AddButton } from '@/features/product-form';
+import { AddPurchaseButton } from '@/features/purchase-form';
 import { AppBar, Box, Button, Container, Tab, Tabs, Toolbar, Typography } from '@mui/material';
 import { useState } from 'react';
 
@@ -22,7 +23,7 @@ export const MainPage = () => {
             販売管理システム
           </Typography>
           <AddButton />
-          <Button variant='contained'>仕入登録</Button>
+          <AddPurchaseButton />
           <Button variant='contained'>販売登録</Button>
         </Toolbar>
       </AppBar>
