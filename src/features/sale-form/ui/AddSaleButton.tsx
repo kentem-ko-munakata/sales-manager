@@ -1,7 +1,7 @@
-import { useSaleStore } from '@/entities/sale';
+import { useSaleStore, type SaleInput } from '@/entities/sale';
 import { Button } from '@mui/material';
 import { useState } from 'react';
-import { toSaleFormInput, type SaleFormValues } from '../model/schema';
+import { toSaleFormInput } from '../model/schema';
 import { SaleForm } from './SaleForm';
 
 export const AddSaleButton = () => {
@@ -10,8 +10,8 @@ export const AddSaleButton = () => {
   // 商品登録モーダル開閉用
   const [open, setOpen] = useState(false);
 
-  const handleSubmit = (values: SaleFormValues) => {
-    addSale(values);
+  const handleSubmit = (input: SaleInput) => {
+    addSale(input);
     setOpen(false);
   };
 

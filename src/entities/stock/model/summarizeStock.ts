@@ -8,6 +8,7 @@ import { findLatestPurchaseByProduct } from './latestPurchase';
 export type StockSummary = {
   productId: string;
   productName: string;
+  purchaseId: string;
   purchaseDate: string; // 仕入日
   purchasePrice: number; // 仕入価格
   salePrice: number; // 販売価格
@@ -32,6 +33,7 @@ export const summarizeStock = (products: Product[], purchases: Purchase[], sales
     summaries.push({
       productId: product.id,
       productName: product.name,
+      purchaseId: latest.id,
       purchaseDate: latest.purchaseDate,
       purchasePrice: latest.purchasePrice,
       salePrice: latest.salePrice,

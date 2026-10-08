@@ -1,49 +1,62 @@
+import type { SaleInput } from '@/entities/sale';
+import { useStockSummaries } from '@/entities/stock';
 import { FormTextField } from '@/shared/ui/FormTextField';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { saleFormSchema, type SaleFormInput, type SaleFormValues } from '../model/schema';
-import { useProductStore } from '@/entities/product';
 
 interface SaleFormProps {
   title: string;
   defaultValues: SaleFormInput;
   submitLabel: string;
   // チェックを通った値だけが渡される
-  onSubmit: (values: SaleFormValues) => void;
+  onSubmit: (input: SaleInput) => void;
   onCancel: () => void;
 }
 
 // 表示している間だけマウントする前提（閉じるたびに入力は破棄される）
 export const SaleForm = ({ title, defaultValues, submitLabel, onSubmit, onCancel }: SaleFormProps) => {
+  // 商品選択用：在庫がある商品だけ
+  const stockSummaries = useStockSummaries();
+  const findSummary = (productId: string) => stockSummaries.find((summary) => summary.productId === productId);
+
   const {
     control,
     handleSubmit, // 送信時にチェックし、通ったときだけ onSubmit を呼ぶ
     formState: { isSubmitting },
   } = useForm<SaleFormInput, unknown, SaleFormValues>({
-    resolver: zodResolver(saleFormSchema), // チェックを zod のスキーマで行う
+    // 選択中の商品の在庫でチェックしたいため、チェックのたびに入力値の商品から在庫を引いてスキーマを作る
+    resolver: (values, context, options) => {
+      const stock = findSummary(values.productId)?.stock;
+      return zodResolver(saleFormSchema(stock))(values, context, options);
+    },
     defaultValues,
   });
-
-  // 商品選択用
-  const products = useProductStore((state) => state.products);
-  // 在庫確認・売上・利益金額算出
 
   return (
     <Dialog open onClose={onCancel} maxWidth='xs' fullWidth>
       <DialogTitle>{title}</DialogTitle>
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+      <form
+        onSubmit={handleSubmit((values) => {
+          const summary = findSummary(values.productId);
+          if (!summary) return; // 商品を選べていれば必ずある（チェックで防いでいる）
+          onSubmit({ ...values, purchaseId: summary.purchaseId }); // 最新の仕入から売る
+        })}
+        noValidate
+      >
         <DialogContent>
           <Stack spacing={2}>
             <FormTextField control={control} name='productId' label='商品名' required autoFocus select>
-              {products.length === 0 ? (
+              {stockSummaries.length === 0 ? (
                 <MenuItem value='' disabled>
-                  商品がありません
+                  在庫のある商品がありません
                 </MenuItem>
               ) : (
-                products.map((product) => (
-                  <MenuItem key={product.id} value={product.id}>
-                    {product.name}
+                stockSummaries.map((summary) => (
+                  <MenuItem key={summary.productId} value={summary.productId}>
+                    {summary.productName}（在庫：{summary.stock.toLocaleString()}、価格：
+                    {summary.salePrice.toLocaleString()}円）
                   </MenuItem>
                 ))
               )}
@@ -55,7 +68,6 @@ export const SaleForm = ({ title, defaultValues, submitLabel, onSubmit, onCancel
               slotProps={{ htmlInput: { inputMode: 'numeric' } }} // e入力不可
               required
             />
-            {/* 合計表示 */}
           </Stack>
         </DialogContent>
         <DialogActions>
