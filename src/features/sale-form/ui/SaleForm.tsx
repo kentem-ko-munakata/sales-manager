@@ -1,5 +1,5 @@
 import type { SaleInput } from '@/entities/sale';
-import { useStockSummaries } from '@/entities/stock';
+import { useStockByProduct, useStockSummaries } from '@/entities/stock';
 import { FormTextField } from '@/shared/ui/FormTextField';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack } from '@mui/material';
@@ -19,18 +19,15 @@ interface SaleFormProps {
 export const SaleForm = ({ title, defaultValues, submitLabel, onSubmit, onCancel }: SaleFormProps) => {
   // 商品選択用：在庫がある商品だけ
   const stockSummaries = useStockSummaries();
-  const findSummary = (productId: string) => stockSummaries.find((summary) => summary.productId === productId);
+  // 在庫チェック用：商品ごとの在庫（在庫を超える数量は販売できない）
+  const stockByProduct = useStockByProduct();
 
   const {
     control,
     handleSubmit, // 送信時にチェックし、通ったときだけ onSubmit を呼ぶ
     formState: { isSubmitting },
   } = useForm<SaleFormInput, unknown, SaleFormValues>({
-    // 選択中の商品の在庫でチェックしたいため、チェックのたびに入力値の商品から在庫を引いてスキーマを作る
-    resolver: (values, context, options) => {
-      const stock = findSummary(values.productId)?.stock;
-      return zodResolver(saleFormSchema(stock))(values, context, options);
-    },
+    resolver: zodResolver(saleFormSchema(stockByProduct)), // チェックを zod のスキーマで行う
     defaultValues,
   });
 
@@ -39,7 +36,7 @@ export const SaleForm = ({ title, defaultValues, submitLabel, onSubmit, onCancel
       <DialogTitle>{title}</DialogTitle>
       <form
         onSubmit={handleSubmit((values) => {
-          const summary = findSummary(values.productId);
+          const summary = stockSummaries.find((item) => item.productId === values.productId);
           if (!summary) return; // 商品を選べていれば必ずある（チェックで防いでいる）
           onSubmit({ ...values, purchaseId: summary.purchaseId }); // 最新の仕入から売る
         })}

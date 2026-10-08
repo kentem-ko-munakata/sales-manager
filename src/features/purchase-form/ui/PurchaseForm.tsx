@@ -4,6 +4,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, St
 import { useForm } from 'react-hook-form';
 import { purchaseFormSchema, type PurchaseFormInput, type PurchaseFormValues } from '../model/schema';
 import { useProductStore } from '@/entities/product';
+import { useStockByProduct } from '@/entities/stock';
 
 interface PurchaseFormProps {
   title: string;
@@ -14,14 +15,16 @@ interface PurchaseFormProps {
   onCancel: () => void;
 }
 
-// 表示している間だけマウントする前提（閉じるたびに入力は破棄される）
 export const PurchaseForm = ({ title, defaultValues, submitLabel, onSubmit, onCancel }: PurchaseFormProps) => {
+  // 在庫チェック用：商品ごとの在庫（在庫が残っている商品は仕入できない）
+  const stockByProduct = useStockByProduct();
+
   const {
     control,
     handleSubmit, // 送信時にチェックし、通ったときだけ onSubmit を呼ぶ
     formState: { isSubmitting },
   } = useForm<PurchaseFormInput, unknown, PurchaseFormValues>({
-    resolver: zodResolver(purchaseFormSchema), // チェックを zod のスキーマで行う
+    resolver: zodResolver(purchaseFormSchema(stockByProduct)),
     defaultValues,
   });
 
