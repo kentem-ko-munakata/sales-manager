@@ -1,7 +1,7 @@
 import { AddButton } from '@/features/product-form';
 import { AddPurchaseButton } from '@/features/purchase-form';
 import { AddSaleButton } from '@/features/sale-form';
-import { AppBar, Box, Button, Container, Tab, Tabs, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Container, Tab, Tabs, Toolbar, Typography } from '@mui/material';
 import { useState } from 'react';
 
 // widgets を作ったら content を <XxxWidget /> に差し替える
