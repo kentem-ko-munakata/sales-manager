@@ -60,6 +60,14 @@ export const SaleForm = ({ title, defaultValues, submitLabel, onSubmit, onCancel
             </FormTextField>
             <FormTextField
               control={control}
+              name='saleDate'
+              label='販売日'
+              type='date'
+              slotProps={{ inputLabel: { shrink: true } }}
+              required
+            />
+            <FormTextField
+              control={control}
               name='quantity'
               label='数量'
               slotProps={{ htmlInput: { inputMode: 'numeric' } }} // e入力不可
