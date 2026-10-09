@@ -11,16 +11,26 @@ const positiveInt = (label: string) =>
     .transform(Number)
     .pipe(z.number().min(1, `${label}は1以上で入力してください`).max(999_999_999, `${label}が大きすぎます`));
 
-export const saleFormSchema = z.object({
-  productId: z.string().min(1, '商品を選択してください'),
-  saleDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日付を入力してください'),
-  quantity: positiveInt('数量'),
-});
+// stockByProduct：商品ごとの在庫（商品ID → 在庫）。在庫を超える数量は販売できない
+export const saleFormSchema = (stockByProduct: Map<string, number>) =>
+  z
+    .object({
+      productId: z.string().min(1, '商品を選択してください'),
+      saleDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日付を入力してください'),
+      quantity: positiveInt('数量'),
+    })
+    // 項目をまたぐチェック（各項目が通ったあとに実行される）
+    .refine((v) => v.quantity <= (stockByProduct.get(v.productId) ?? 0), {
+      message: '在庫数を超えています',
+      path: ['quantity'], // エラーを数量の欄に出す
+    });
 
+// 戻り値のschema型抽出
+type SaleFormSchema = ReturnType<typeof saleFormSchema>;
 // 入力中の値（useFormのdefaultValues）
-export type SaleFormInput = z.input<typeof saleFormSchema>;
+export type SaleFormInput = z.input<SaleFormSchema>;
 // チェック後の値（onSubmitで受け取る値）
-export type SaleFormValues = z.output<typeof saleFormSchema>;
+export type SaleFormValues = z.output<SaleFormSchema>;
 
 // フォームの初期値
 export const toSaleFormInput = (sale?: Sale): SaleFormInput => ({

@@ -11,4 +11,4 @@ export const saleSchema = z.object({
 });
 
 export type Sale = z.infer<typeof saleSchema>;
-export type SaleInput = Omit<Sale, 'id' | 'purchaseId' | 'createdAt' | 'updatedAt'>;
+export type SaleInput = Omit<Sale, 'id' | 'createdAt' | 'updatedAt'>;
