@@ -1,6 +1,7 @@
 import { AddButton } from '@/features/product-form';
 import { AddPurchaseButton } from '@/features/purchase-form';
 import { AddSaleButton } from '@/features/sale-form';
+import { SalesSummary } from '@/widgets/sales-summary';
 import { TodaySalesSummary } from '@/widgets/today-sales-summary';
 import { AppBar, Box, Container, Tab, Tabs, Toolbar, Typography } from '@mui/material';
 import { useState } from 'react';
@@ -9,7 +10,7 @@ import { useState } from 'react';
 const tabs = [
   { value: 'todaySales', label: '本日の販売状況', content: <TodaySalesSummary /> },
   { value: 'inventory', label: '在庫一覧', content: '在庫一覧を表示する' },
-  { value: 'salesAnalytics', label: '販売集計', content: 'これまでの販売状況を表示する' },
+  { value: 'salesAnalytics', label: '販売集計', content: <SalesSummary /> },
 ];
 
 export const MainPage = () => {
