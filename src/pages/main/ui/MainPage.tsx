@@ -23,6 +23,7 @@ export const MainPage = () => {
           <Typography variant='h6' component='div' sx={{ flexGrow: 1 }}>
             販売管理システム
           </Typography>
+          {/* ボタン系 */}
           <AddButton />
           <AddPurchaseButton />
           <AddSaleButton />

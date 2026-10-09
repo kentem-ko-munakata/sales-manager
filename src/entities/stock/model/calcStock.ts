@@ -5,7 +5,7 @@ import type { Sale } from '@/entities/sale';
 export const calcStockByProduct = (purchases: Purchase[], sales: Sale[]): Map<string, number> => {
   const stockByProductId = new Map<string, number>();
 
-  // 商品ごとの仕入数
+  // 商品ごとの仕入数を加算
   for (const purchase of purchases) {
     stockByProductId.set(
       purchase.productId,
@@ -13,7 +13,7 @@ export const calcStockByProduct = (purchases: Purchase[], sales: Sale[]): Map<st
       (stockByProductId.get(purchase.productId) ?? 0) + purchase.quantity,
     );
   }
-  // 商品ごとの販売数
+  // 商品ごとの販売数を減算
   for (const sale of sales) {
     stockByProductId.set(sale.productId, (stockByProductId.get(sale.productId) ?? 0) - sale.quantity);
   }

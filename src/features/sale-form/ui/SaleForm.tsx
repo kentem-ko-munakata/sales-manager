@@ -10,12 +10,11 @@ interface SaleFormProps {
   title: string;
   defaultValues: SaleFormInput;
   submitLabel: string;
-  // チェックを通った値だけが渡される
+  // purchaseIdは商品IDから最新のものを取得
   onSubmit: (input: SaleInput) => void;
   onCancel: () => void;
 }
 
-// 表示している間だけマウントする前提（閉じるたびに入力は破棄される）
 export const SaleForm = ({ title, defaultValues, submitLabel, onSubmit, onCancel }: SaleFormProps) => {
   // 商品選択用：在庫がある商品だけ
   const stockSummaries = useStockSummaries();
@@ -38,6 +37,7 @@ export const SaleForm = ({ title, defaultValues, submitLabel, onSubmit, onCancel
         onSubmit={handleSubmit((values) => {
           const summary = stockSummaries.find((item) => item.productId === values.productId);
           if (!summary) return; // 商品を選べていれば必ずある（チェックで防いでいる）
+          // formにpurchaseIdないため、指定
           onSubmit({ ...values, purchaseId: summary.purchaseId }); // 最新の仕入から売る
         })}
         noValidate

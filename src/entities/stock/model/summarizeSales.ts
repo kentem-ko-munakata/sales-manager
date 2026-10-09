@@ -33,7 +33,7 @@ export const summarizeSales = (
   // productID:売上状況（商品ごとの1行）
   const summaryByProductId = new Map<string, SalesSummary>();
 
-  // 販売情報を1件ずつ確認
+  // 販売情報を1件ずつ確認し、summary（出力形式）にセットしていく(≒join)
   for (const sale of sales) {
     if (!isInPeriod(sale.saleDate, period)) continue;
 

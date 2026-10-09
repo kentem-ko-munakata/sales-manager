@@ -16,7 +16,6 @@ interface ProductFormProps {
   onCancel: () => void;
 }
 
-// 表示している間だけマウントする前提（閉じるたびに入力は破棄される）
 export const ProductForm = ({ title, defaultValues, editingId, submitLabel, onSubmit, onCancel }: ProductFormProps) => {
   // 重複チェック用：登録済みの商品名（編集中の商品は除く）
   const products = useProductStore((state) => state.products);

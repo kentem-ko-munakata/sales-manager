@@ -9,6 +9,7 @@ const positiveInt = (label: string) =>
     .min(1, `${label}を入力してください`)
     .regex(/^\d+$/, `${label}は1以上の整数で入力してください`)
     .transform(Number)
+    // pipe → number型変換後に数字チェック（範囲チェック）
     .pipe(z.number().min(1, `${label}は1以上で入力してください`).max(999_999_999, `${label}が大きすぎます`));
 
 export const purchaseFormSchema = (stockByProduct: Map<string, number>) =>
