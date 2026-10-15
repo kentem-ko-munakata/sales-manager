@@ -1,5 +1,5 @@
-import React from 'react';
+import { MainPage } from '@/pages/main';
 
 export const App = () => {
-  return <div>App</div>;
+  return <MainPage />;
 };

@@ -1,0 +1,87 @@
+import type { SaleInput } from '@/entities/sale';
+import { useStockByProduct, useStockSummaries } from '@/entities/stock';
+import { FormTextField } from '@/shared/ui/FormTextField';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack } from '@mui/material';
+import { useForm } from 'react-hook-form';
+import { saleFormSchema, type SaleFormInput, type SaleFormValues } from '../model/schema';
+
+interface SaleFormProps {
+  title: string;
+  defaultValues: SaleFormInput;
+  submitLabel: string;
+  // purchaseIdは商品IDから最新のものを取得
+  onSubmit: (input: SaleInput) => void;
+  onCancel: () => void;
+}
+
+export const SaleForm = ({ title, defaultValues, submitLabel, onSubmit, onCancel }: SaleFormProps) => {
+  // 商品選択用：在庫がある商品だけ
+  const stockSummaries = useStockSummaries();
+  // 在庫チェック用：商品ごとの在庫（在庫を超える数量は販売できない）
+  const stockByProduct = useStockByProduct();
+
+  const {
+    control,
+    handleSubmit, // 送信時にチェックし、通ったときだけ onSubmit を呼ぶ
+    formState: { isSubmitting },
+  } = useForm<SaleFormInput, unknown, SaleFormValues>({
+    resolver: zodResolver(saleFormSchema(stockByProduct)), // チェックを zod のスキーマで行う
+    defaultValues,
+  });
+
+  return (
+    <Dialog open onClose={onCancel} maxWidth='xs' fullWidth>
+      <DialogTitle>{title}</DialogTitle>
+      <form
+        onSubmit={handleSubmit((values) => {
+          const summary = stockSummaries.find((item) => item.productId === values.productId);
+          if (!summary) return; // 商品を選べていれば必ずある（チェックで防いでいる）
+          // formにpurchaseIdないため、指定
+          onSubmit({ ...values, purchaseId: summary.purchaseId }); // 最新の仕入から売る
+        })}
+        noValidate
+      >
+        <DialogContent>
+          <Stack spacing={2}>
+            <FormTextField control={control} name='productId' label='商品名' required autoFocus select>
+              {stockSummaries.length === 0 ? (
+                <MenuItem value='' disabled>
+                  在庫のある商品がありません
+                </MenuItem>
+              ) : (
+                stockSummaries.map((summary) => (
+                  <MenuItem key={summary.productId} value={summary.productId}>
+                    {summary.productName}（在庫：{summary.stock.toLocaleString()}、価格：
+                    {summary.salePrice.toLocaleString()}円）
+                  </MenuItem>
+                ))
+              )}
+            </FormTextField>
+            <FormTextField
+              control={control}
+              name='saleDate'
+              label='販売日'
+              type='date'
+              slotProps={{ inputLabel: { shrink: true } }}
+              required
+            />
+            <FormTextField
+              control={control}
+              name='quantity'
+              label='数量'
+              slotProps={{ htmlInput: { inputMode: 'numeric' } }} // e入力不可
+              required
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onCancel}>キャンセル</Button>
+          <Button type='submit' variant='contained' disabled={isSubmitting}>
+            {submitLabel}
+          </Button>
+        </DialogActions>
+      </form>
+    </Dialog>
+  );
+};
